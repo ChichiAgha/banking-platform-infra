@@ -41,10 +41,39 @@ module "eks" {
   cluster_name    = "${local.name_prefix}-eks"
   cluster_version = var.cluster_version
 
-  enable_cluster_creator_admin_permissions = true
+  enable_cluster_creator_admin_permissions = false
 
-  cluster_endpoint_public_access  = false
-  cluster_endpoint_private_access = true
+  access_entries = merge({
+    cluster_creator = {
+      principal_arn = var.cluster_creator_admin_principal_arn
+      policy_associations = {
+        admin = {
+          policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+          access_scope = {
+            type = "cluster"
+          }
+        }
+      }
+    }
+    }, {
+    for principal_arn in var.cluster_admin_principal_arns : principal_arn => {
+      principal_arn = principal_arn
+      policy_associations = {
+        cluster_admin = {
+          policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+          access_scope = {
+            type = "cluster"
+          }
+        }
+      }
+    }
+  })
+
+  kms_key_administrators = [var.cluster_creator_admin_principal_arn]
+
+  cluster_endpoint_public_access       = var.cluster_endpoint_public_access
+  cluster_endpoint_public_access_cidrs = var.cluster_endpoint_public_access_cidrs
+  cluster_endpoint_private_access      = true
 
   vpc_id     = module.vpc.vpc_id
   subnet_ids = module.vpc.private_subnets

@@ -8,11 +8,15 @@ azs      = ["eu-west-2a", "eu-west-2b"]
 public_subnets  = ["10.20.0.0/24", "10.20.1.0/24"]
 private_subnets = ["10.20.10.0/24", "10.20.11.0/24"]
 
-cluster_version     = "1.35"
-node_instance_types = ["t3.medium"]
-node_desired_size   = 2
-node_min_size       = 1
-node_max_size       = 3
+cluster_version                      = "1.35"
+cluster_endpoint_public_access       = true
+cluster_endpoint_public_access_cidrs = ["90.206.174.76/32"]
+cluster_admin_principal_arns         = ["arn:aws:iam::716969407191:user/chinow"]
+cluster_creator_admin_principal_arn  = "arn:aws:iam::716969407191:role/banking-github-terraform-apply"
+node_instance_types                  = ["t3.medium"]
+node_desired_size                    = 2
+node_min_size                        = 1
+node_max_size                        = 3
 
 external_secrets_sa_namespace = "external-secrets"
 external_secrets_sa_name      = "external-secrets"
