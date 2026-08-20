@@ -24,11 +24,13 @@ resource "aws_kms_alias" "terraform_state" {
 }
 
 resource "aws_s3_bucket" "terraform_state" {
-  bucket = "${var.project}-${data.aws_caller_identity.current.account_id}-terraform-state"
+  bucket        = "${var.project}-${data.aws_caller_identity.current.account_id}-terraform-state"
+  force_destroy = var.force_destroy_state_buckets
 }
 
 resource "aws_s3_bucket" "terraform_state_logs" {
-  bucket = "${var.project}-${data.aws_caller_identity.current.account_id}-terraform-state-logs"
+  bucket        = "${var.project}-${data.aws_caller_identity.current.account_id}-terraform-state-logs"
+  force_destroy = var.force_destroy_state_buckets
 }
 
 resource "aws_s3_bucket_public_access_block" "terraform_state_logs" {
