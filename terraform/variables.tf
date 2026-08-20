@@ -57,6 +57,11 @@ variable "cluster_endpoint_public_access_cidrs" {
   }
 }
 
+variable "cluster_creator_admin_principal_arn" {
+  description = "Stable IAM principal used by Terraform CI/CD to administer EKS and its KMS key"
+  type        = string
+}
+
 variable "cluster_admin_principal_arns" {
   description = "IAM principals granted explicit EKS cluster-administrator access"
   type        = set(string)

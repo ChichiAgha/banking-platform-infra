@@ -12,6 +12,7 @@ cluster_version                      = "1.35"
 cluster_endpoint_public_access       = true
 cluster_endpoint_public_access_cidrs = ["90.206.174.76/32"]
 cluster_admin_principal_arns         = ["arn:aws:iam::716969407191:user/chinow"]
+cluster_creator_admin_principal_arn  = "arn:aws:iam::716969407191:role/banking-github-terraform-apply"
 node_instance_types                  = ["t3.medium"]
 node_desired_size                    = 2
 node_min_size                        = 1
