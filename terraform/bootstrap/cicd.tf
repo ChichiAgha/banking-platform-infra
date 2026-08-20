@@ -260,6 +260,7 @@ data "aws_iam_policy_document" "terraform_apply" {
     effect = "Allow"
     actions = [
       "autoscaling:*", "ec2:*", "eks:*", "elasticloadbalancing:*",
+      "acm:*",
       "iam:*", "kms:*", "logs:*", "rds:*",
       "cognito-idp:CreateUserPool", "cognito-idp:DeleteUserPool",
       "cognito-idp:DescribeUserPool", "cognito-idp:UpdateUserPool",
