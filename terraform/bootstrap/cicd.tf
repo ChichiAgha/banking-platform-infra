@@ -53,6 +53,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "terraform_state_logs" {
   rule {
     id     = "expire-access-logs"
     status = "Enabled"
+    filter {}
     expiration { days = 365 }
   }
 }
