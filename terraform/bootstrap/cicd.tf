@@ -257,7 +257,16 @@ data "aws_iam_policy_document" "terraform_apply" {
     effect = "Allow"
     actions = [
       "autoscaling:*", "ec2:*", "eks:*", "elasticloadbalancing:*",
-      "iam:*", "kms:*", "logs:*", "rds:*", "secretsmanager:CreateSecret",
+      "iam:*", "kms:*", "logs:*", "rds:*",
+      "cognito-idp:CreateUserPool", "cognito-idp:DeleteUserPool",
+      "cognito-idp:DescribeUserPool", "cognito-idp:UpdateUserPool",
+      "cognito-idp:CreateUserPoolClient", "cognito-idp:DeleteUserPoolClient",
+      "cognito-idp:DescribeUserPoolClient", "cognito-idp:UpdateUserPoolClient",
+      "cognito-idp:CreateUserPoolDomain", "cognito-idp:DeleteUserPoolDomain",
+      "cognito-idp:DescribeUserPoolDomain", "cognito-idp:UpdateUserPoolDomain",
+      "cognito-idp:GetUserPoolMfaConfig", "cognito-idp:SetUserPoolMfaConfig",
+      "cognito-idp:ListTagsForResource", "cognito-idp:TagResource",
+      "cognito-idp:UntagResource", "secretsmanager:CreateSecret",
       "secretsmanager:DeleteSecret", "secretsmanager:DescribeSecret",
       "secretsmanager:RotateSecret", "secretsmanager:TagResource",
       "secretsmanager:UpdateSecret", "sts:GetCallerIdentity"
