@@ -67,3 +67,16 @@ output "cognito_user_pool_domain" {
   description = "Cognito hosted domain prefix used by the ALB authentication action"
   value       = aws_cognito_user_pool_domain.banking.domain
 }
+output "acm_certificate_arn" {
+  description = "ACM certificate ARN for the application ALB"
+  value       = aws_acm_certificate.application.arn
+}
+
+output "acm_dns_validation_records" {
+  description = "DNS validation CNAME records to create at the external DNS provider"
+  value = [for option in aws_acm_certificate.application.domain_validation_options : {
+    name  = option.resource_record_name
+    type  = option.resource_record_type
+    value = option.resource_record_value
+  }]
+}
