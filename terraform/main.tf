@@ -143,3 +143,22 @@ module "external_secrets_irsa" {
 
   tags = local.common_tags
 }
+
+module "aws_load_balancer_controller_irsa" {
+  source = "git::https://github.com/terraform-aws-modules/terraform-aws-iam.git//modules/iam-role-for-service-accounts-eks?ref=c29ec1ed409683086f63f83ff5b10a6f3c296ef2"
+
+  role_name = "${local.name_prefix}-aws-load-balancer-controller"
+
+  attach_load_balancer_controller_policy = true
+
+  oidc_providers = {
+    this = {
+      provider_arn = module.eks.oidc_provider_arn
+      namespace_service_accounts = [
+        "kube-system:aws-load-balancer-controller"
+      ]
+    }
+  }
+
+  tags = local.common_tags
+}

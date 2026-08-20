@@ -47,3 +47,23 @@ output "rds_master_secret_arn" {
   description = "AWS-managed Secrets Manager ARN for the RDS credentials"
   value       = aws_db_instance.banking.master_user_secret[0].secret_arn
 }
+
+output "aws_load_balancer_controller_irsa_role_arn" {
+  description = "IAM role ARN for the AWS Load Balancer Controller service account"
+  value       = module.aws_load_balancer_controller_irsa.iam_role_arn
+}
+
+output "cognito_user_pool_arn" {
+  description = "Cognito user pool ARN used by the ALB authentication action"
+  value       = aws_cognito_user_pool.banking.arn
+}
+
+output "cognito_user_pool_client_id" {
+  description = "Cognito application client ID used by the ALB authentication action"
+  value       = aws_cognito_user_pool_client.banking_alb.id
+}
+
+output "cognito_user_pool_domain" {
+  description = "Cognito hosted domain prefix used by the ALB authentication action"
+  value       = aws_cognito_user_pool_domain.banking.domain
+}
