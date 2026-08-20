@@ -1,0 +1,54 @@
+name: terraform-plan-apply
+
+on:
+  pull_request:
+    paths:
+      - 'envs/**'
+      - 'modules/**'
+      - 'global/**'
+  push:
+    branches: [ main ]
+    paths:
+      - 'envs/**'
+      - 'modules/**'
+      - 'global/**'
+
+jobs:
+  plan:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        env: [dev, prod]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+      - name: Terraform init
+        run: terraform -chdir=envs/${{ matrix.env }} init -backend-config=backend.hcl
+      - name: Terraform fmt check
+        run: terraform fmt -check -recursive
+      - name: Terraform validate
+        run: terraform -chdir=envs/${{ matrix.env }} validate
+      - name: Terraform plan
+        run: terraform -chdir=envs/${{ matrix.env }} plan -out=tfplan
+
+  apply-dev:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+      - run: terraform -chdir=envs/dev init -backend-config=backend.hcl
+      - run: terraform -chdir=envs/dev apply -auto-approve
+
+  apply-prod:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    environment: prod
+    needs: apply-dev
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+      - run: terraform -chdir=envs/prod init -backend-config=backend.hcl
+      - run: terraform -chdir=envs/prod apply -auto-approve

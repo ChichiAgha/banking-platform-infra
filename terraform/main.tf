@@ -58,9 +58,9 @@ module "eks" {
   }
 
   cluster_addons = {
-    coredns = {}
+    coredns    = {}
     kube-proxy = {}
-    vpc-cni = {}
+    vpc-cni    = {}
   }
 
   tags = local.common_tags

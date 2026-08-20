@@ -1,0 +1,72 @@
+name: app-ci-build-publish
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Run tests
+        run: |
+          echo "Run frontend and backend tests here"
+
+  build-and-push:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::<ACCOUNT_ID>:role/<GITHUB_OIDC_ECR_PUSH_ROLE>
+          aws-region: <AWS_REGION>
+      - name: Login to ECR
+        uses: aws-actions/amazon-ecr-login@v2
+      - name: Build and push images
+        env:
+          SHA_TAG: ${{ github.sha }}
+          ECR_REGISTRY: <ACCOUNT_ID>.dkr.ecr.<AWS_REGION>.amazonaws.com
+        run: |
+          docker build -t $ECR_REGISTRY/bank-user-service:$SHA_TAG services/user-service
+          docker push $ECR_REGISTRY/bank-user-service:$SHA_TAG
+          docker build -t $ECR_REGISTRY/bank-transaction-service:$SHA_TAG services/transaction-service
+          docker push $ECR_REGISTRY/bank-transaction-service:$SHA_TAG
+          docker build -t $ECR_REGISTRY/bank-activity-service:$SHA_TAG services/activity-service
+          docker push $ECR_REGISTRY/bank-activity-service:$SHA_TAG
+          docker build -t $ECR_REGISTRY/bank-frontend:$SHA_TAG frontend
+          docker push $ECR_REGISTRY/bank-frontend:$SHA_TAG
+      - name: Produce image manifest artifact
+        run: |
+          cat > images.json <<EOF
+          {
+            "tag": "${{ github.sha }}",
+            "user": "bank-user-service",
+            "transaction": "bank-transaction-service",
+            "activity": "bank-activity-service",
+            "frontend": "bank-frontend"
+          }
+          EOF
+      - uses: actions/upload-artifact@v4
+        with:
+          name: image-manifest
+          path: images.json

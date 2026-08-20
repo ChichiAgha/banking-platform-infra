@@ -5,3 +5,5 @@ This repository contains Terraform platform infrastructure only:
 - Networking
 - IAM/IRSA
 - External Secrets IAM policy/role
+- Remote-state bootstrap resources
+- Enterprise repository-model reference material
