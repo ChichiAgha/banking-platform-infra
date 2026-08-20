@@ -1,4 +1,0 @@
-misconfigurations:
-  - id: AVD-AWS-0104
-    expired_at: 2026-09-30
-    statement: Development EKS managed nodes require outbound access through the NAT gateway until private AWS service VPC endpoints are provisioned.
