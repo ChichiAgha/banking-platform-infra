@@ -4,3 +4,4 @@
 *.tfplan
 terraform/bootstrap/terraform.tfvars
 
+teardown-backup-*/

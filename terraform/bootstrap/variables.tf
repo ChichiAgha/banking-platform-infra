@@ -31,6 +31,12 @@ variable "force_delete_ecr" {
   default     = false
 }
 
+variable "force_destroy_state_buckets" {
+  description = "Permit deletion of versioned Terraform state buckets during an explicitly approved full teardown"
+  type        = bool
+  default     = false
+}
+
 variable "image_retention_count" {
   description = "Number of tagged images retained per repository"
   type        = number
