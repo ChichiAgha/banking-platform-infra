@@ -255,7 +255,10 @@ data "aws_iam_policy_document" "terraform_apply" {
     effect = "Allow"
     actions = [
       "autoscaling:*", "ec2:*", "eks:*", "elasticloadbalancing:*",
-      "iam:*", "kms:*", "logs:*", "sts:GetCallerIdentity"
+      "iam:*", "kms:*", "logs:*", "rds:*", "secretsmanager:CreateSecret",
+      "secretsmanager:DeleteSecret", "secretsmanager:DescribeSecret",
+      "secretsmanager:RotateSecret", "secretsmanager:TagResource",
+      "secretsmanager:UpdateSecret", "sts:GetCallerIdentity"
     ]
     resources = ["*"]
   }

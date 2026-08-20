@@ -52,3 +52,14 @@ Do not run a local apply for normal changes. Submit a feature branch and pull re
 The terraform/bootstrap stack owns the state bucket, KMS key, GitHub OIDC integration, ECR repositories, and CI roles. Bootstrap should be changed rarely, by an administrator, with its own plan review.
 
 The development EKS stack has been planned but not applied. Merging the infrastructure pull request does not bypass protected-environment approval.
+
+## Managed PostgreSQL credentials
+
+The platform creates a private encrypted RDS PostgreSQL instance. RDS generates and rotates the master password in AWS Secrets Manager; Terraform state contains the secret ARN but not the password. External Secrets IAM is restricted to that generated secret and its database KMS key.
+
+After the approved development apply, obtain the non-secret handoff values:
+
+    terraform -chdir=terraform output -raw rds_master_secret_arn
+    terraform -chdir=terraform output -raw external_secrets_irsa_role_arn
+
+Promote the secret ARN into the development GitOps environment value before syncing the banking application. Never retrieve or commit the secret value.
