@@ -12,7 +12,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: terraform-ci-${{ github.ref }}
+  group: terraform-ci-production-${{ github.ref }}
   cancel-in-progress: true
 
 env:
