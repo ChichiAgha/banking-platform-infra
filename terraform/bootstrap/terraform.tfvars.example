@@ -1,5 +1,5 @@
 aws_region       = "eu-west-2"
 project          = "banking"
-github_owner     = "techbleat"
-github_repository = "BankingApp"
+github_owner     = "ChichiAgha"
+github_repository = "banking-services"
 github_branch    = "main"
