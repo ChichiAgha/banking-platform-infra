@@ -10,7 +10,7 @@ private_subnets = ["10.30.10.0/24", "10.30.11.0/24", "10.30.12.0/24"]
 
 cluster_version                      = "1.35"
 cluster_endpoint_public_access       = true
-cluster_endpoint_public_access_cidrs = ["90.206.174.76/32"]
+cluster_endpoint_public_access_cidrs = ["31.216.0.105/32"]
 cluster_admin_principal_arns         = ["arn:aws:iam::716969407191:user/chinow"]
 cluster_creator_admin_principal_arn  = "arn:aws:iam::716969407191:role/banking-github-terraform-apply"
 node_instance_types                  = ["m6i.large"]
