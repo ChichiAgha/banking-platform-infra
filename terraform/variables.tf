@@ -161,3 +161,8 @@ variable "db_skip_final_snapshot" {
   description = "Whether RDS deletion skips a final snapshot"
   type        = bool
 }
+
+variable "application_domain" {
+  description = "Public application hostname used for Cognito callback and logout URLs"
+  type        = string
+}
