@@ -40,6 +40,29 @@ variable "cluster_version" {
   default     = "1.30"
 }
 
+variable "cluster_endpoint_public_access" {
+  description = "Whether the EKS API endpoint is reachable from approved public CIDRs"
+  type        = bool
+  default     = false
+}
+
+variable "cluster_endpoint_public_access_cidrs" {
+  description = "CIDRs permitted to reach the public EKS API endpoint; use explicit /32 addresses for temporary administration"
+  type        = list(string)
+  default     = []
+
+  validation {
+    condition     = length([for cidr in var.cluster_endpoint_public_access_cidrs : cidr if cidr == "0.0.0.0/0"]) == 0
+    error_message = "Public EKS API access must never allow 0.0.0.0/0."
+  }
+}
+
+variable "cluster_admin_principal_arns" {
+  description = "IAM principals granted explicit EKS cluster-administrator access"
+  type        = set(string)
+  default     = []
+}
+
 variable "node_instance_types" {
   description = "Managed node group instance types"
   type        = list(string)
