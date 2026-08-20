@@ -27,6 +27,87 @@ resource "aws_s3_bucket" "terraform_state" {
   bucket = "${var.project}-${data.aws_caller_identity.current.account_id}-terraform-state"
 }
 
+resource "aws_s3_bucket" "terraform_state_logs" {
+  bucket = "${var.project}-${data.aws_caller_identity.current.account_id}-terraform-state-logs"
+}
+
+resource "aws_s3_bucket_public_access_block" "terraform_state_logs" {
+  bucket                  = aws_s3_bucket.terraform_state_logs.id
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "terraform_state_logs" {
+  bucket = aws_s3_bucket.terraform_state_logs.id
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
+  }
+}
+
+resource "aws_s3_bucket_lifecycle_configuration" "terraform_state_logs" {
+  bucket = aws_s3_bucket.terraform_state_logs.id
+  rule {
+    id     = "expire-access-logs"
+    status = "Enabled"
+    expiration { days = 365 }
+  }
+}
+
+data "aws_iam_policy_document" "terraform_state_logs" {
+  statement {
+    sid       = "AllowS3LogDelivery"
+    effect    = "Allow"
+    actions   = ["s3:PutObject"]
+    resources = ["${aws_s3_bucket.terraform_state_logs.arn}/state-access/AWSLogs/${data.aws_caller_identity.current.account_id}/*"]
+    principals {
+      type        = "Service"
+      identifiers = ["logging.s3.amazonaws.com"]
+    }
+    condition {
+      test     = "StringEquals"
+      variable = "aws:SourceAccount"
+      values   = [data.aws_caller_identity.current.account_id]
+    }
+    condition {
+      test     = "ArnLike"
+      variable = "aws:SourceArn"
+      values   = [aws_s3_bucket.terraform_state.arn]
+    }
+  }
+
+  statement {
+    sid       = "DenyInsecureTransport"
+    effect    = "Deny"
+    actions   = ["s3:*"]
+    resources = [aws_s3_bucket.terraform_state_logs.arn, "${aws_s3_bucket.terraform_state_logs.arn}/*"]
+    principals {
+      type        = "*"
+      identifiers = ["*"]
+    }
+    condition {
+      test     = "Bool"
+      variable = "aws:SecureTransport"
+      values   = ["false"]
+    }
+  }
+}
+
+resource "aws_s3_bucket_policy" "terraform_state_logs" {
+  bucket = aws_s3_bucket.terraform_state_logs.id
+  policy = data.aws_iam_policy_document.terraform_state_logs.json
+}
+
+resource "aws_s3_bucket_logging" "terraform_state" {
+  bucket        = aws_s3_bucket.terraform_state.id
+  target_bucket = aws_s3_bucket.terraform_state_logs.id
+  target_prefix = "state-access/"
+  depends_on    = [aws_s3_bucket_policy.terraform_state_logs]
+}
+
 resource "aws_s3_bucket_versioning" "terraform_state" {
   bucket = aws_s3_bucket.terraform_state.id
   versioning_configuration { status = "Enabled" }
