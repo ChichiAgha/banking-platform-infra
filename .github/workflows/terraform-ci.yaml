@@ -26,11 +26,11 @@ jobs:
   validate-and-scan:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - uses: hashicorp/setup-terraform@v3
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3
         with:
           terraform_version: "1.13.3"
-      - uses: terraform-linters/setup-tflint@v6
+      - uses: terraform-linters/setup-tflint@c750028ac0f3831886a261f96da68ab58a92e7ec # v6
         with:
           tflint_version: v0.59.1
       - name: Check formatting
@@ -47,7 +47,7 @@ jobs:
           tflint --init
           tflint --recursive
       - name: Report HIGH and CRITICAL IaC findings
-        uses: aquasecurity/trivy-action@v0.36.0
+        uses: aquasecurity/trivy-action@a9c7b0f06e461e9d4b4d1711f154ee024b8d7ab8 # v0.36.0
         with:
           scan-type: config
           scan-ref: terraform
@@ -57,7 +57,7 @@ jobs:
           severity: HIGH,CRITICAL
           exit-code: "0"
       - name: Enforce CRITICAL IaC gate
-        uses: aquasecurity/trivy-action@v0.36.0
+        uses: aquasecurity/trivy-action@a9c7b0f06e461e9d4b4d1711f154ee024b8d7ab8 # v0.36.0
         with:
           scan-type: config
           scan-ref: terraform
@@ -75,12 +75,12 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v5
-      - uses: hashicorp/setup-terraform@v3
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3
         with:
           terraform_version: "1.13.3"
       - name: Configure read-only AWS plan credentials
-        uses: aws-actions/configure-aws-credentials@v6.2.3
+        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
         with:
           role-to-assume: ${{ vars.TF_PLAN_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
@@ -100,7 +100,7 @@ jobs:
         run: |
           terraform plan -lock-timeout=5m -var-file=envs/dev.tfvars -out=tfplan
           terraform show -no-color tfplan > tfplan.txt
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: terraform-development-plan-${{ github.sha }}
           path: terraform/tfplan.txt

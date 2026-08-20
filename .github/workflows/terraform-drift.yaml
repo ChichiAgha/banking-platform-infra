@@ -24,11 +24,11 @@ jobs:
   detect-development-drift:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - uses: hashicorp/setup-terraform@v3
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3
         with:
           terraform_version: "1.13.3"
-      - uses: aws-actions/configure-aws-credentials@v6.2.3
+      - uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
         with:
           role-to-assume: ${{ vars.TF_PLAN_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
