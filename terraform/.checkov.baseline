@@ -1,0 +1,103 @@
+{
+    "failed_checks": [
+        {
+            "file": "/bootstrap/cicd.tf",
+            "findings": [
+                {
+                    "resource": "aws_iam_policy_document.terraform_apply",
+                    "check_ids": [
+                        "CKV2_AWS_40",
+                        "CKV_AWS_107",
+                        "CKV_AWS_109",
+                        "CKV_AWS_110",
+                        "CKV_AWS_111",
+                        "CKV_AWS_356"
+                    ]
+                },
+                {
+                    "resource": "aws_iam_policy_document.terraform_state_key",
+                    "check_ids": [
+                        "CKV_AWS_109",
+                        "CKV_AWS_111",
+                        "CKV_AWS_356"
+                    ]
+                },
+                {
+                    "resource": "aws_s3_bucket.terraform_state",
+                    "check_ids": [
+                        "CKV2_AWS_61",
+                        "CKV2_AWS_62",
+                        "CKV_AWS_144"
+                    ]
+                },
+                {
+                    "resource": "aws_s3_bucket.terraform_state_logs",
+                    "check_ids": [
+                        "CKV2_AWS_62",
+                        "CKV_AWS_144",
+                        "CKV_AWS_145",
+                        "CKV_AWS_21"
+                    ]
+                },
+                {
+                    "resource": "aws_s3_bucket_lifecycle_configuration.terraform_state_logs",
+                    "check_ids": [
+                        "CKV_AWS_300"
+                    ]
+                }
+            ]
+        },
+        {
+            "file": "/bootstrap/main.tf",
+            "findings": [
+                {
+                    "resource": "aws_ecr_repository.service[\"bank-activity-service\"]",
+                    "check_ids": [
+                        "CKV_AWS_136"
+                    ]
+                },
+                {
+                    "resource": "aws_ecr_repository.service[\"bank-frontend\"]",
+                    "check_ids": [
+                        "CKV_AWS_136"
+                    ]
+                },
+                {
+                    "resource": "aws_ecr_repository.service[\"bank-transaction-service\"]",
+                    "check_ids": [
+                        "CKV_AWS_136"
+                    ]
+                },
+                {
+                    "resource": "aws_ecr_repository.service[\"bank-user-service\"]",
+                    "check_ids": [
+                        "CKV_AWS_136"
+                    ]
+                }
+            ]
+        },
+        {
+            "file": "/main.tf",
+            "findings": [
+                {
+                    "resource": "eks",
+                    "check_ids": [
+                        "CKV_TF_1"
+                    ]
+                },
+                {
+                    "resource": "external_secrets_irsa",
+                    "check_ids": [
+                        "CKV_TF_1"
+                    ]
+                },
+                {
+                    "resource": "vpc",
+                    "check_ids": [
+                        "CKV_TF_1"
+                    ]
+                }
+            ]
+        }
+    ]
+}

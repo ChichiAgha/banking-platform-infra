@@ -23,7 +23,19 @@ env:
   STATE_KMS_KEY_ARN: ${{ vars.TF_STATE_KMS_KEY_ARN }}
 
 jobs:
+  secret-scan:
+    name: Shift-left secret scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          fetch-depth: 0
+      - name: Detect committed secrets
+        uses: gitleaks/gitleaks-action@dcedce43c6f43de0b836d1fe38946645c9c638dc # v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   validate-and-scan:
+    needs: secret-scan
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
@@ -46,26 +58,14 @@ jobs:
         run: |
           tflint --init
           tflint --recursive
-      - name: Report HIGH and CRITICAL IaC findings
-        uses: aquasecurity/trivy-action@a9c7b0f06e461e9d4b4d1711f154ee024b8d7ab8 # v0.36.0
+      - name: Enforce Checkov Terraform policy
+        uses: bridgecrewio/checkov-action@59b9d7edfcad5b87fbe3f473a9a134a721ad03f8 # v12
         with:
-          scan-type: config
-          scan-ref: terraform
-          skip-dirs: terraform/.terraform
-          trivyignores: terraform/.trivyignore.yaml
-          format: table
-          severity: HIGH,CRITICAL
-          exit-code: "0"
-      - name: Enforce CRITICAL IaC gate
-        uses: aquasecurity/trivy-action@a9c7b0f06e461e9d4b4d1711f154ee024b8d7ab8 # v0.36.0
-        with:
-          scan-type: config
-          scan-ref: terraform
-          skip-dirs: terraform/.terraform
-          trivyignores: terraform/.trivyignore.yaml
-          format: table
-          severity: CRITICAL
-          exit-code: "1"
+          directory: terraform
+          framework: terraform
+          baseline: terraform/.checkov.baseline
+          quiet: true
+          soft_fail: false
 
   plan-development:
     if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'

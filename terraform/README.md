@@ -6,7 +6,7 @@ This stack provisions AWS networking, EKS, managed nodes, and External Secrets I
 
 GitHub Actions uses short-lived AWS credentials through OIDC:
 
-- Pull requests run formatting, validation, TFLint, Trivy IaC scanning, and a read-only development plan.
+- Pull requests run Gitleaks first, then formatting, validation, TFLint, Checkov Terraform policy, and a read-only development plan.
 - Merges to main start the development apply workflow.
 - The apply job uses the protected development environment and requires approval before AWS changes begin.
 - A weekly refresh-only plan fails if infrastructure drift is detected.
@@ -30,7 +30,7 @@ Provider lock files are committed so CI and local runs use the same provider ver
 - terraform-cd.yaml: protected development plan and apply after merge.
 - terraform-drift.yaml: scheduled development drift detection.
 
-Trivy reports HIGH and CRITICAL findings, while only CRITICAL findings block. The managed-node egress exception in .trivyignore.yaml is documented and expires on 2026-09-30. It must be removed or reviewed after private AWS service VPC endpoints are implemented.
+Checkov blocks new Terraform policy violations. Existing findings are recorded in .checkov.baseline as visible remediation debt; removing a baseline entry makes the corresponding policy enforceable. Trivy remains the container-image vulnerability scanner in the services pipeline.
 
 ## Local validation
 
