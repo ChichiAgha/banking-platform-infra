@@ -27,3 +27,23 @@ output "external_secrets_irsa_role_arn" {
   description = "IAM role ARN to annotate on External Secrets service account"
   value       = module.external_secrets_irsa.iam_role_arn
 }
+
+output "rds_endpoint" {
+  description = "PostgreSQL endpoint; not sensitive"
+  value       = aws_db_instance.banking.address
+}
+
+output "rds_port" {
+  description = "PostgreSQL port"
+  value       = aws_db_instance.banking.port
+}
+
+output "rds_database_name" {
+  description = "Initial PostgreSQL database name"
+  value       = aws_db_instance.banking.db_name
+}
+
+output "rds_master_secret_arn" {
+  description = "AWS-managed Secrets Manager ARN for the RDS credentials"
+  value       = aws_db_instance.banking.master_user_secret[0].secret_arn
+}

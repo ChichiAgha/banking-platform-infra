@@ -80,3 +80,56 @@ variable "external_secrets_allowed_secret_arns" {
   description = "Secrets Manager ARNs External Secrets can read"
   type        = list(string)
 }
+
+variable "db_engine_version" {
+  description = "PostgreSQL engine version"
+  type        = string
+  default     = "18.3"
+}
+
+variable "db_instance_class" {
+  description = "RDS instance class"
+  type        = string
+}
+
+variable "db_name" {
+  description = "Initial application database name"
+  type        = string
+  default     = "bankingdb"
+}
+
+variable "db_master_username" {
+  description = "RDS master username; password is generated and managed by RDS"
+  type        = string
+  default     = "banking_admin"
+}
+
+variable "db_allocated_storage" {
+  description = "Initial RDS storage in GiB"
+  type        = number
+}
+
+variable "db_max_allocated_storage" {
+  description = "Maximum autoscaled RDS storage in GiB"
+  type        = number
+}
+
+variable "db_multi_az" {
+  description = "Whether RDS uses a Multi-AZ standby"
+  type        = bool
+}
+
+variable "db_backup_retention_days" {
+  description = "RDS automated backup retention period"
+  type        = number
+}
+
+variable "db_deletion_protection" {
+  description = "Protect RDS from deletion"
+  type        = bool
+}
+
+variable "db_skip_final_snapshot" {
+  description = "Whether RDS deletion skips a final snapshot"
+  type        = bool
+}

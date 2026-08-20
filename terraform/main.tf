@@ -76,7 +76,14 @@ data "aws_iam_policy_document" "external_secrets_read" {
       "secretsmanager:DescribeSecret",
       "secretsmanager:ListSecretVersionIds"
     ]
-    resources = var.external_secrets_allowed_secret_arns
+    resources = concat(var.external_secrets_allowed_secret_arns, [aws_db_instance.banking.master_user_secret[0].secret_arn])
+  }
+
+  statement {
+    sid       = "AllowDecryptRDSManagedSecret"
+    effect    = "Allow"
+    actions   = ["kms:Decrypt"]
+    resources = [aws_kms_key.database.arn]
   }
 }
 

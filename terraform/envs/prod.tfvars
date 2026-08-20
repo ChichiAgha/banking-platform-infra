@@ -17,6 +17,12 @@ node_max_size       = 9
 external_secrets_sa_namespace = "external-secrets"
 external_secrets_sa_name      = "external-secrets"
 
-external_secrets_allowed_secret_arns = [
-  "arn:aws:secretsmanager:eu-west-2:716969407191:secret:/bank/prod/app-*"
-]
+external_secrets_allowed_secret_arns = []
+
+db_instance_class        = "db.t4g.small"
+db_allocated_storage     = 100
+db_max_allocated_storage = 500
+db_multi_az              = true
+db_backup_retention_days = 35
+db_deletion_protection   = true
+db_skip_final_snapshot   = false
