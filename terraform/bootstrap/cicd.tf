@@ -156,7 +156,10 @@ locals {
     "${local.infra_repository_prefix}:pull_request",
     "${local.infra_repository_prefix}:ref:refs/heads/main",
   ]
-  infra_apply_subject = "${local.infra_repository_prefix}:environment:development"
+  infra_apply_subjects = [
+    "${local.infra_repository_prefix}:environment:development",
+    "${local.infra_repository_prefix}:environment:production",
+  ]
 }
 
 data "aws_iam_policy_document" "github_infra_plan_assume" {
@@ -196,7 +199,7 @@ data "aws_iam_policy_document" "github_infra_apply_assume" {
     condition {
       test     = "StringEquals"
       variable = "token.actions.githubusercontent.com:sub"
-      values   = [local.infra_apply_subject]
+      values   = local.infra_apply_subjects
     }
   }
 }
