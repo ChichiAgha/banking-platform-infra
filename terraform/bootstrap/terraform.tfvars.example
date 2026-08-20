@@ -3,3 +3,6 @@ project          = "banking"
 github_owner     = "ChichiAgha"
 github_repository = "banking-services"
 github_branch    = "main"
+
+github_owner_id      = "53154899"
+github_repository_id = "1340148066"

@@ -7,7 +7,7 @@ locals {
     "bank-activity-service",
     "bank-frontend",
   ])
-  github_subject = "repo:${var.github_owner}/${var.github_repository}:ref:refs/heads/${var.github_branch}"
+  github_subject = "repo:${var.github_owner}@${var.github_owner_id}/${var.github_repository}@${var.github_repository_id}:ref:refs/heads/${var.github_branch}"
 }
 
 resource "aws_ecr_repository" "service" {

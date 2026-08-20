@@ -36,3 +36,13 @@ variable "image_retention_count" {
   type        = number
   default     = 50
 }
+
+variable "github_owner_id" {
+  description = "Immutable numeric GitHub owner ID used in OIDC subjects"
+  type        = string
+}
+
+variable "github_repository_id" {
+  description = "Immutable numeric GitHub repository ID used in OIDC subjects"
+  type        = string
+}
