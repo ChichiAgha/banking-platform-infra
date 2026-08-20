@@ -21,3 +21,19 @@ output "github_ecr_publish_role_arn" {
 output "github_oidc_subject" {
   value = local.github_subject
 }
+
+output "terraform_state_bucket" {
+  value = aws_s3_bucket.terraform_state.id
+}
+
+output "terraform_state_kms_key_arn" {
+  value = aws_kms_key.terraform_state.arn
+}
+
+output "github_terraform_plan_role_arn" {
+  value = aws_iam_role.github_terraform_plan.arn
+}
+
+output "github_terraform_apply_role_arn" {
+  value = aws_iam_role.github_terraform_apply.arn
+}

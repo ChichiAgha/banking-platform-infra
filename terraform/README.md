@@ -1,61 +1,54 @@
-# Terraform: EKS + IRSA + External Secrets IAM
+# Terraform: AWS platform infrastructure
 
-This stack provisions:
-- AWS VPC and networking
-- EKS cluster and managed node group
-- IAM policy for reading AWS Secrets Manager
-- IRSA role for External Secrets service account
+This stack provisions AWS networking, EKS, managed nodes, and External Secrets IAM.
 
-## Files
+## Delivery model
 
-- `main.tf`: VPC, EKS, IAM policy, IRSA role
-- `variables.tf`: input variables
-- `outputs.tf`: exported values
-- `envs/dev.tfvars`: dev environment inputs
-- `envs/prod.tfvars`: prod environment inputs
+GitHub Actions uses short-lived AWS credentials through OIDC:
 
-## Prerequisites
+- Pull requests run formatting, validation, TFLint, Trivy IaC scanning, and a read-only development plan.
+- Merges to main start the development apply workflow.
+- The apply job uses the protected development environment and requires approval before AWS changes begin.
+- A weekly refresh-only plan fails if infrastructure drift is detected.
+- No long-lived AWS access keys are stored in GitHub.
 
-- Terraform >= 1.6
-- AWS credentials with permissions for VPC, EKS, IAM
-- EKS kubectl access after apply
+Application delivery remains GitOps: Terraform creates the platform; Argo CD reconciles Kubernetes manifests from the GitOps repository.
 
-## Apply (dev)
+## Remote state
 
-```bash
-cd infrastructure/terraform
-terraform init
-terraform plan -var-file=envs/dev.tfvars
-terraform apply -var-file=envs/dev.tfvars
-```
+State is stored in the versioned, public-access-blocked S3 bucket banking-716969407191-terraform-state, encrypted by a customer-managed KMS key. Native S3 lockfiles protect concurrent operations.
 
-## Apply (prod)
+- Bootstrap key: banking/bootstrap/terraform.tfstate
+- Development key: banking/dev/terraform.tfstate
+- Production should use a separate key and protected environment.
 
-```bash
-cd infrastructure/terraform
-terraform init
-terraform plan -var-file=envs/prod.tfvars
-terraform apply -var-file=envs/prod.tfvars
-```
+Provider lock files are committed so CI and local runs use the same provider versions. The account-specific bootstrap tfvars file remains ignored.
 
-## External Secrets wiring
+## Workflows
 
-After apply, get the IRSA role:
+- terraform-ci.yaml: PR quality gates and development plan artifact.
+- terraform-cd.yaml: protected development plan and apply after merge.
+- terraform-drift.yaml: scheduled development drift detection.
 
-```bash
-terraform output external_secrets_irsa_role_arn
-```
+Trivy reports HIGH and CRITICAL findings, while only CRITICAL findings block. The managed-node egress exception in .trivyignore.yaml is documented and expires on 2026-09-30. It must be removed or reviewed after private AWS service VPC endpoints are implemented.
 
-Annotate the External Secrets service account with this role ARN, or configure it via Helm values.
+## Local validation
 
-Service account target defaults:
-- Namespace: `external-secrets`
-- Name: `external-secrets`
+    terraform -chdir=terraform fmt -check -recursive
+    terraform -chdir=terraform init -backend=false
+    terraform -chdir=terraform validate
+    terraform -chdir=terraform plan -var-file=envs/dev.tfvars
 
-Adjust in tfvars if your deployment uses different names.
+Do not run a local apply for normal changes. Submit a feature branch and pull request, review the plan artifact, merge it, then approve the protected environment deployment.
 
-## Important
+## Security notes
 
-- Replace placeholder AWS account IDs in tfvars ARNs.
-- Keep dev/prod state isolated in your backend config.
-- Use private subnets for workloads and keep least-privilege secret ARNs.
+- The EKS API endpoint is private only.
+- Nodes run in private subnets and currently use NAT for required outbound access.
+- External Secrets is restricted to the configured Secrets Manager ARN scope.
+- Development and production values are separated under envs/.
+- The apply IAM policy is service-scoped but broad for initial provisioning. Narrow it with resource conditions and an organizational permission boundary before treating this as a production landing zone.
+
+The terraform/bootstrap stack owns the state bucket, KMS key, GitHub OIDC integration, ECR repositories, and CI roles. Bootstrap should be changed rarely, by an administrator, with its own plan review.
+
+The development EKS stack has been planned but not applied. Merging the infrastructure pull request does not bypass protected-environment approval.

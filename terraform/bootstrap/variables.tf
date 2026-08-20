@@ -46,3 +46,13 @@ variable "github_repository_id" {
   description = "Immutable numeric GitHub repository ID used in OIDC subjects"
   type        = string
 }
+
+variable "github_infra_repository" {
+  description = "GitHub infrastructure repository name, without the owner"
+  type        = string
+}
+
+variable "github_infra_repository_id" {
+  description = "Immutable numeric GitHub infrastructure repository ID"
+  type        = string
+}

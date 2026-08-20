@@ -1,0 +1,107 @@
+name: terraform-ci
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "terraform/**"
+      - ".github/workflows/terraform-*.yaml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: terraform-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  TF_IN_AUTOMATION: "true"
+  TF_INPUT: "false"
+  AWS_REGION: ${{ vars.AWS_REGION }}
+  STATE_BUCKET: ${{ vars.TF_STATE_BUCKET }}
+  STATE_KMS_KEY_ARN: ${{ vars.TF_STATE_KMS_KEY_ARN }}
+
+jobs:
+  validate-and-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.13.3"
+      - uses: terraform-linters/setup-tflint@v6
+        with:
+          tflint_version: v0.59.1
+      - name: Check formatting
+        run: terraform fmt -check -recursive terraform
+      - name: Initialize without backend
+        working-directory: terraform
+        run: terraform init -backend=false
+      - name: Validate
+        working-directory: terraform
+        run: terraform validate
+      - name: Lint
+        working-directory: terraform
+        run: |
+          tflint --init
+          tflint --recursive
+      - name: Report HIGH and CRITICAL IaC findings
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: config
+          scan-ref: terraform
+          skip-dirs: terraform/.terraform
+          trivyignores: terraform/.trivyignore.yaml
+          format: table
+          severity: HIGH,CRITICAL
+          exit-code: "0"
+      - name: Enforce CRITICAL IaC gate
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: config
+          scan-ref: terraform
+          skip-dirs: terraform/.terraform
+          trivyignores: terraform/.trivyignore.yaml
+          format: table
+          severity: CRITICAL
+          exit-code: "1"
+
+  plan-development:
+    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
+    needs: validate-and-scan
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v5
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.13.3"
+      - name: Configure read-only AWS plan credentials
+        uses: aws-actions/configure-aws-credentials@v6.2.3
+        with:
+          role-to-assume: ${{ vars.TF_PLAN_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+          role-session-name: terraform-plan-${{ github.run_id }}
+      - name: Initialize encrypted remote state
+        working-directory: terraform
+        run: |
+          terraform init -reconfigure \
+            -backend-config="bucket=${STATE_BUCKET}" \
+            -backend-config="key=banking/dev/terraform.tfstate" \
+            -backend-config="region=${AWS_REGION}" \
+            -backend-config="encrypt=true" \
+            -backend-config="kms_key_id=${STATE_KMS_KEY_ARN}" \
+            -backend-config="use_lockfile=true"
+      - name: Plan development infrastructure
+        working-directory: terraform
+        run: |
+          terraform plan -lock-timeout=5m -var-file=envs/dev.tfvars -out=tfplan
+          terraform show -no-color tfplan > tfplan.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: terraform-development-plan-${{ github.sha }}
+          path: terraform/tfplan.txt
+          retention-days: 14
