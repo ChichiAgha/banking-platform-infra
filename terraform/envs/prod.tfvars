@@ -21,7 +21,9 @@ node_max_size                        = 9
 external_secrets_sa_namespace = "external-secrets"
 external_secrets_sa_name      = "external-secrets"
 
-external_secrets_allowed_secret_arns = []
+external_secrets_allowed_secret_arns = [
+  "arn:aws:secretsmanager:eu-west-2:716969407191:secret:banking/prod/datadog-*",
+]
 
 db_instance_class        = "db.t4g.small"
 db_allocated_storage     = 100
